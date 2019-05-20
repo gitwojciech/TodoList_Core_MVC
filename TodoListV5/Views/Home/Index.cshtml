@@ -1,0 +1,83 @@
+﻿@model ListTaskViewModel
+
+
+<h2>To do tasks</h2>
+
+<partial name="_Create" for="ListTask">
+
+
+    <div class="col-md-1 col-md-8 col-md-2">
+        <table class="table table-striped container">
+            @foreach (var task in Model.ListTasks)
+            {
+
+                <tr>
+                    <td>
+                        <input type="checkbox" asp-for="@task.Status" id="@task.Id" class="toggle" />
+                    </td>
+                    <td id="description @task.Id">
+                        @if (@task.Status == true)
+                        {
+                            <del>
+                                @task.Description
+                            </del>
+                        }
+                        else
+                        {
+                            @task.Description
+                        }
+                    </td>
+                    <td>
+                        <a class="btn btn-link" asp-action="Delete" asp-route-taskId="@task.Id">
+                            Remove
+                        </a>
+                    </td>
+                </tr>
+
+
+            }
+
+        </table>
+    </div>
+
+    @section footer {
+        @if (TempData["MessageOK"] != null)
+        {
+            <div class="alert alert-info">@TempData["MessageOK"]</div>
+        }
+        @if (TempData["MessageError"] != null)
+        {
+            <div class="alert alert-danger">@TempData["MessageError"]</div>
+        }
+    }
+
+
+        @section scripts {
+            <script>
+                $(function () {
+                    $('.toggle').change(function () {
+                        var self = $(this);
+                        var url = "/Home/CheckBoxAction";
+                        var id = self.attr('id');
+                        var status = self.prop('checked');
+
+                        $.ajax({
+                            url: url,
+                            data: { id: id, status: status },
+                            method: 'POST',
+                            cache: false,
+                            success: function (response) {
+                                console.log(response);
+                                var descriptionCurrent = document.getElementById("description " + id).innerHTML;
+                                var descriptionClean = descriptionCurrent.replace("<del>", "").replace("<\del>", "")
+                                if (status == true)
+                                    document.getElementById("description " + id).innerHTML = "<del>" + descriptionCurrent + "</del>";
+                                else
+                                    document.getElementById("description " + id).innerHTML = descriptionClean;
+                            }
+                        });
+                    });
+                });
+            </script>
+        }
+
